@@ -1,13 +1,33 @@
 import sys
+import gzip
+import binascii
 
 
 def root_dir():
     return "HTTP/1.1 200 OK\r\n\r\n"
 
 
-def echo(path):
+def echo(path, request):
+    for line in request.get_headers():
+        if line.startswith("Accept-Encoding:"):
+            encoding = line.split(": ")[1]
     data = path.split("/")[-1]
-    return f"HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: {len(data)}\r\n\r\n{data}"
+
+    accept_encoding = False
+    for encode in encoding.split(", "):
+        if encode == "gzip":
+            encode_type = "gzip"
+            accept_encoding = True
+
+
+    if accept_encoding:
+        data_bytes = bytes(data, "utf-8")
+        gzip_data = gzip.compress(data_bytes)
+        hex_data = binascii.hexlify(gzip_data).decode("utf-8")
+
+        return f"HTTP/1.1 200 OK\r\nContent-Encoding: {encode_type}\r\nContent-Type: text/plain\r\nContent-Length: {len(hex_data)}\r\n\r\n{hex_data}"
+    else:
+        return f"HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: {len(data)}\r\n\r\n{data}"
 
 
 def user_agent(request):
@@ -45,7 +65,7 @@ def create_response(request):
         case "/":
             response = root_dir()
         case path if path.startswith("/echo/"):
-            response = echo(path)
+            response = echo(path, request)
         case "/user-agent":
             response = user_agent(request)
         case path if path.startswith("/files"):

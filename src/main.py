@@ -3,13 +3,14 @@ import threading
 from handle_client import handle_client
 
 
+# @TODO ADD HTTP COMPRESSION
+# @TODO CONVERT HEADERS TO LOWERCASE BEFORE COMPARISON
 def main():
     print("Logging...")
 
     try:
         # Creating the server
         server_socket = socket.create_server(("localhost", 8080), reuse_port=True)
-
         while True:
             # Waiting for connection
             client_socket, client_address = server_socket.accept()
