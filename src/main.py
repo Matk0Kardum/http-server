@@ -3,8 +3,6 @@ import threading
 from handle_client import handle_client
 
 
-# @TODO ADD HTTP COMPRESSION
-# @TODO CONVERT HEADERS TO LOWERCASE BEFORE COMPARISON
 def main():
     print("Logging...")
 
